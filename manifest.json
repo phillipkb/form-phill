@@ -5,7 +5,8 @@
     "author": "Phillip Kekoa bannister",
     "version": "1.0",
     "permissions": [
-        "activeTab"
+        "activeTab",
+        "storage"
     ],
     "action": {
         "default_popup": "popup.html"
