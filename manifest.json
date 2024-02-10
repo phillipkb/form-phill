@@ -1,20 +1,33 @@
 {
     "name": "form-phill",
     "manifest_version": 3,
-    "description": "This extension allows you to auto-fill forms.",
+    "description": "This extension allows you to auto-fill forms from cached values. Please don't cache anything sensitive.",
     "author": "Phillip Kekoa bannister",
     "version": "1.0",
     "permissions": [
         "activeTab",
         "storage"
     ],
+    "icons": {
+        "16": "icons/16x16_scroll.png",
+        "24": "icons/24x24_scroll.png",
+        "32": "icons/32x32_scroll.png"
+    },
     "action": {
-        "default_popup": "popup.html"
+        "default_icon": {
+            "16": "icons/32x32_scroll.png"
+        },
+        "default_popup": "popup.html",
+        "default_title": "Shall I phill you in?"
     },
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["content_script.js"]
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content_script.js"
+            ]
         }
     ]
 }
