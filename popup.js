@@ -17,13 +17,13 @@ const getFields = async () => {
     return fieldValues
 }
 
-const syncFields = async (event) => {
+const syncFields = async () => {
     const tab = await getActiveTab()
     const fields = await getFields()
     await chrome.tabs.sendMessage(tab.id, { event: "syncFields", fields })
 }
 
-const clearCache = async () => {
+const clearStorage = async () => {
     chrome.storage.local.clear(function () {
         if (chrome.runtime.lastError) {
             console.error(`Error clearing local storage: ${chrome.runtime.lastError}`);
@@ -31,20 +31,22 @@ const clearCache = async () => {
             console.log('Local storage cleared');
         }
     });
+    
+    // remove current fields and fetch from content script
+    document.querySelectorAll('.fp_input-block, .fp_button-block').forEach(node => node.remove())
+    await makeFields()
 }
 
-// const dropField = async (event) => {
-//     console.log("🚀 ~ dropField ~ event:", event.target)
-//     const fields = await getFields()
-    
-//     const fieldId = event.target.dataset.fieldId
-//     // on click, call chrome.storage.local.remove with the id
-//     fields.filter(field => field.id !== fieldId)
-//     writeToStorage(fields)
+const dropField = async (event) => {
+    const { containerId, targetFieldId } = event.target.dataset
+    const fields = await getFields()
 
-//     const targetField = document.querySelector(`#${fieldId}`)
-//     targetField.parentNode.remove()
-// }
+    const filteredFields = fields.filter(field => field.id !== targetFieldId)
+    writeToStorage(filteredFields)
+
+    const targetField = document.querySelector(`#${containerId}`)
+    targetField.remove()
+}
 
 const writeOnChange = async (event) => {
     const { value: newValue, id } = event.target
@@ -63,11 +65,11 @@ const writeToStorage = async (fields) => {
     await chrome.storage.local.set({ [tab.url]: fields })
 }
 
-
 const makeElement = (config) => {
-    const { element, className, value, attributes, innerText, eventListener, eventAction } = config
+    const { element, className, value, attributes, innerText, eventListener, eventAction, id } = config
     const node = document.createElement(element)
 
+    if (id) node.id = id
     if (className) node.classList.add(className)
     if (value) node.value = value
     if (innerText) node.innerText = innerText
@@ -81,23 +83,26 @@ const makeElement = (config) => {
     return node
 }
 
-const openPopup = async () => {
+const randomId = () => Math.random().toString(36).substring(2, 15)
+
+const makeFields = async () => {
     const fields = await getFields('fields')
 
     const container = document.querySelector("#fp_container")
 
     fields.forEach((field) => {
-        const inputBlock = makeElement({ element: 'div', className: 'fp_input-block', })
+        const inputBlock = makeElement({ element: 'div', className: 'fp_input-block', id: randomId() })
+
         const inputWrapper = makeElement({ element: 'div', className: 'fp_input-wrapper' })
-        const labelNode = makeElement({ element: 'label', className: 'fp_label', innerText: field.name || field.id })
-        // const dropIcon = makeElement({
-        //     element: 'span',
-        //     className: 'fp_circle',
-        //     innerText: 'X',
-        //     eventListener: dropField,
-        //     eventAction: 'click',
-        //     attributes: [['data-field-id', field.id]]
-        // })
+        const labelNode = makeElement({ element: 'label', className: 'fp_label', innerText: field.name || field.placeholder })
+        const dropIcon = makeElement({
+            element: 'span',
+            className: 'fp_drop-icon',
+            innerText: 'X',
+            eventListener: dropField,
+            eventAction: 'click',
+            attributes: [['data-container-id', inputBlock.id], ['data-target-field-id', field.id]]
+        })
         const inputNode = makeElement({
             element: 'input',
             className: 'fp_input',
@@ -106,8 +111,7 @@ const openPopup = async () => {
             eventAction: 'input',
             attributes: [['id', field.id], ['placeholder', field.placeholder]]
         })
-        // inputWrapper.append(dropIcon)
-        inputWrapper.append(inputNode)
+        inputWrapper.append(inputNode, dropIcon)
         inputBlock.append(labelNode, inputWrapper)
         container.append(inputBlock)
     })
@@ -123,8 +127,8 @@ const openPopup = async () => {
     const clearButton = makeElement({
         element: 'button',
         className: 'fp_button',
-        innerText: 'clear cache',
-        eventListener: clearCache,
+        innerText: 'clear memory',
+        eventListener: clearStorage,
         eventAction: 'click'
     })
 
@@ -132,4 +136,4 @@ const openPopup = async () => {
     container.append(buttonBlock)
 }
 
-openPopup()
+makeFields()

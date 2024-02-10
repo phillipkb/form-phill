@@ -28,12 +28,12 @@
     cursor: pointer;
 }
 
-/* .fp_drop-icon {
+.fp_drop-icon {
     display: inline-block;
-    margin: 4px;
+    margin: 0 8px;
+    font-weight: bold;
     width: 12px;
     height: 12px;
     color: red;
-    position: relative;
     cursor: pointer;
-} */
+}
