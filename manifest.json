@@ -1,7 +1,7 @@
 {
     "name": "form-phill",
     "manifest_version": 3,
-    "description": "This extension allows you to auto-fill forms from stored values. Please don't stored anything sensitive.",
+    "description": "This extension allows you to phill forms with stored values. Please don't store anything sensitive.",
     "author": "Phillip Kekoa bannister",
     "version": "1.0",
     "permissions": [

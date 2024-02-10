@@ -1,3 +1,2 @@
 # form-phill
-
-I got tired of manually filling forms while prototyping / local testing.
+This extension allows you to phill forms with stored values. Please don't store anything sensitive.
